@@ -69,7 +69,6 @@ def load_view():
 
     total_historico = 0
     df_timeline = pd.DataFrame()
-    df_heatmap_data = pd.DataFrame()
 
     if not df_historico.empty and 'Username' in df_historico.columns:
         df_user_hist = df_historico[df_historico['Username'] == target_student].copy()
@@ -98,12 +97,9 @@ def load_view():
     media_redacao = 0
     if not df_redacoes.empty and 'Username' in df_redacoes.columns:
         df_red_user = df_redacoes[df_redacoes['Username'] == target_student].copy()
-        cols_comp = ['Competencia1', 'Competencia2', 'Competencia3', 'Competencia4', 'Competencia5', 'Nota']
-        for c in cols_comp:
-            if c in df_red_user.columns:
-                df_red_user[c] = pd.to_numeric(df_red_user[c], errors='coerce').fillna(0)
         
         if 'Nota' in df_red_user.columns:
+            df_red_user['Nota'] = pd.to_numeric(df_red_user['Nota'], errors='coerce').fillna(0)
             media_redacao = df_red_user['Nota'].mean()
 
     conteudos_estudados = 0
@@ -128,23 +124,23 @@ def load_view():
 
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
-        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Total Questões</div><div class='kpi-val'>{int(total_geral)}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Total Questoes</div><div class='kpi-val'>{int(total_geral)}</div></div>", unsafe_allow_html=True)
     with c2:
         perc = (total_semana_atual / meta_semana_atual * 100) if meta_semana_atual > 0 else 0
         st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Meta Semanal</div><div class='kpi-val'>{int(perc)}%</div></div>", unsafe_allow_html=True)
     with c3:
-        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Média Simulados</div><div class='kpi-val'>{media_simulados:.1f}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Media Simulados</div><div class='kpi-val'>{media_simulados:.1f}</div></div>", unsafe_allow_html=True)
     with c4:
-        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Média Redação</div><div class='kpi-val'>{media_redacao:.0f}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Media Redacao</div><div class='kpi-val'>{media_redacao:.0f}</div></div>", unsafe_allow_html=True)
     with c5:
-        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Conteúdos Vistos</div><div class='kpi-val'>{conteudos_estudados}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>Conteudos Vistos</div><div class='kpi-val'>{conteudos_estudados}</div></div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
     col_evo, col_radar = st.columns([2, 1])
 
     with col_evo:
-        st.markdown("### Evolução de Questões")
+        st.markdown("### Evolucao de Questoes")
         if not df_timeline.empty or total_semana_atual > 0:
             df_atual_agg = pd.DataFrame({'Semana': ['Atual'], 'Qtd': [total_semana_atual]})
             df_final = pd.concat([df_timeline, df_atual_agg], ignore_index=True)
@@ -175,7 +171,7 @@ def load_view():
     c_sim, c_red = st.columns(2)
 
     with c_sim:
-        st.markdown("### Evolução por Área (Simulados)")
+        st.markdown("### Evolucao por Area (Simulados)")
         if not df_sim_user.empty:
             df_areas = df_sim_user[['Simulado', 'Nota_Linguagens', 'Nota_Humanas', 'Nota_Natureza', 'Nota_Matematica']].copy()
             if not df_areas.empty:
@@ -184,23 +180,30 @@ def load_view():
                 fig_areas.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='#ECFDF5', legend=dict(orientation="h", y=-0.2))
                 st.plotly_chart(fig_areas, use_container_width=True)
             else:
-                st.info("Colunas de notas não encontradas.")
+                st.info("Colunas de notas nao encontradas.")
         else:
             st.info("Sem dados de simulados.")
 
     with c_red:
-        st.markdown("### Competências da Redação")
+        st.markdown("### Competencias da Redacao")
         if not df_red_user.empty:
-            cols_c = ['Competencia1', 'Competencia2', 'Competencia3', 'Competencia4', 'Competencia5']
-            medias_comp = df_red_user[cols_c].mean().tolist()
-            nomes_comp = ['C1', 'C2', 'C3', 'C4', 'C5']
+            expected_cols = ['Competencia1', 'Competencia2', 'Competencia3', 'Competencia4', 'Competencia5']
+            valid_cols = [c for c in expected_cols if c in df_red_user.columns]
             
-            fig_red = go.Figure()
-            fig_red.add_trace(go.Scatterpolar(r=medias_comp, theta=nomes_comp, fill='toself', line_color='#F472B6'))
-            fig_red.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 200])), showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='#ECFDF5', margin=dict(t=20, b=20))
-            st.plotly_chart(fig_red, use_container_width=True)
+            if valid_cols:
+                for c in valid_cols:
+                     df_red_user[c] = pd.to_numeric(df_red_user[c], errors='coerce').fillna(0)
+                
+                medias_comp = df_red_user[valid_cols].mean().tolist()
+                
+                fig_red = go.Figure()
+                fig_red.add_trace(go.Scatterpolar(r=medias_comp, theta=valid_cols, fill='toself', line_color='#F472B6'))
+                fig_red.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 200])), showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='#ECFDF5', margin=dict(t=20, b=20))
+                st.plotly_chart(fig_red, use_container_width=True)
+            else:
+                st.info("Detalhes das competencias nao encontrados na planilha.")
         else:
-            st.info("Sem dados de redação.")
+            st.info("Sem dados de redacao.")
 
     st.markdown("---")
     
@@ -219,11 +222,11 @@ def load_view():
             st.info("Sem dados semanais.")
 
     with c_tree:
-        st.markdown("### Distribuição de Conteúdos")
+        st.markdown("### Distribuicao de Conteudos")
         if not df_cont_user.empty:
             df_tree = df_cont_user.groupby('Materia').size().reset_index(name='Qtd')
             fig_tree = px.treemap(df_tree, path=['Materia'], values='Qtd', color='Qtd', color_continuous_scale='Mint')
             fig_tree.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='#ECFDF5', margin=dict(t=0, b=0, l=0, r=0))
             st.plotly_chart(fig_tree, use_container_width=True)
         else:
-            st.info("Sem conteúdos registrados.")
+            st.info("Sem conteudos registrados.")
