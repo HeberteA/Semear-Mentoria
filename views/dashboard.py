@@ -46,6 +46,9 @@ def load_view():
         st.error(f"Erro: {e}")
         return
 
+    # PROCESSAMENTO DE DADOS
+
+    # 1. QUESTOES (Diaria + Historico)
     total_semana = 0
     meta_semana = 0
     df_semana = pd.DataFrame()
@@ -155,7 +158,7 @@ def load_view():
         if clean_slots:
             df_time = pd.Series(clean_slots).value_counts().reset_index()
             df_time.columns = ['Materia', 'Qtd_Horas']
-            
+
     c1, c2, c3, c4, c5 = st.columns(5)
     
     st.markdown("""
