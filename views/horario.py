@@ -55,6 +55,47 @@ def add_new_subject(worksheet, username, materia, cor):
     except Exception as e:
         return False, str(e)
 
+def update_subject_color(worksheet, username, materia, new_color):
+    try:
+        all_values = worksheet.get_all_values()
+        header = all_values[0]
+        try:
+            user_idx = header.index("Username")
+            mat_idx = header.index("Materia")
+            cor_idx = header.index("Cor")
+        except:
+            return False, "Erro na estrutura da planilha"
+
+        for i, row in enumerate(all_values):
+            if i == 0: continue
+            if len(row) > mat_idx and row[user_idx] == username and row[mat_idx] == materia:
+                worksheet.update_cell(i + 1, cor_idx + 1, new_color)
+                return True, "Cor atualizada"
+        
+        return False, "Materia nao encontrada"
+    except Exception as e:
+        return False, str(e)
+
+def delete_subject(worksheet, username, materia):
+    try:
+        all_values = worksheet.get_all_values()
+        header = all_values[0]
+        try:
+            user_idx = header.index("Username")
+            mat_idx = header.index("Materia")
+        except:
+            return False, "Erro na estrutura da planilha"
+
+        for i, row in enumerate(all_values):
+            if i == 0: continue
+            if len(row) > mat_idx and row[user_idx] == username and row[mat_idx] == materia:
+                worksheet.delete_rows(i + 1)
+                return True, "Materia excluida"
+        
+        return False, "Materia nao encontrada"
+    except Exception as e:
+        return False, str(e)
+
 def init_schedule_if_needed(df, username, worksheet):
     has_user = False
     if not df.empty and 'Username' in df.columns:
@@ -226,33 +267,64 @@ def load_view():
             
     if is_mentor:
         with tabs[1]:
-            with st.expander("Cadastrar Nova Materia / Cor", expanded=False):
-                c1, c2, c3 = st.columns([2, 1, 1])
-                with c1:
-                    new_materia = st.text_input("Nome da Materia")
-                with c2:
-                    new_cor = st.color_picker("Cor da Etiqueta", "#10B981")
-                with c3:
-                    st.write("")
-                    st.write("")
-                    if st.button("Adicionar", use_container_width=True):
-                        if new_materia:
-                            success, msg = add_new_subject(ws_materias, target_student, new_materia, new_cor)
-                            if success:
-                                st.success(msg)
+            with st.expander("Gerenciar Materias e Cores", expanded=False):
+                tab_add, tab_manage = st.tabs(["Adicionar Nova", "Editar/Excluir"])
+                
+                with tab_add:
+                    c1, c2, c3 = st.columns([2, 1, 1])
+                    with c1:
+                        new_materia = st.text_input("Nome da Materia")
+                    with c2:
+                        new_cor = st.color_picker("Cor", "#10B981")
+                    with c3:
+                        st.write("")
+                        st.write("")
+                        if st.button("Adicionar", use_container_width=True):
+                            if new_materia:
+                                success, msg = add_new_subject(ws_materias, target_student, new_materia, new_cor)
+                                if success:
+                                    st.success(msg)
+                                    sleep(1)
+                                    st.rerun()
+                                else:
+                                    st.warning(msg)
+                            else:
+                                st.warning("Digite um nome.")
+                                
+                with tab_manage:
+                    if subject_colors:
+                        col_sel, col_pk, col_act = st.columns([2, 1, 1])
+                        with col_sel:
+                            materia_sel = st.selectbox("Selecione a Materia", options=sorted(list(subject_colors.keys())))
+                        with col_pk:
+                            curr_color = subject_colors.get(materia_sel, "#ffffff")
+                            edit_cor = st.color_picker("Nova Cor", curr_color)
+                        with col_act:
+                            st.write("")
+                            st.write("")
+                            if st.button("Salvar Cor", use_container_width=True):
+                                s, m = update_subject_color(ws_materias, target_student, materia_sel, edit_cor)
+                                if s:
+                                    st.success(m)
+                                    sleep(1)
+                                    st.rerun()
+                                else:
+                                    st.error(m)
+                        
+                        st.markdown("---")
+                        if st.button(f"Excluir {materia_sel}", type="primary", use_container_width=True):
+                            s, m = delete_subject(ws_materias, target_student, materia_sel)
+                            if s:
+                                st.success(m)
                                 sleep(1)
                                 st.rerun()
                             else:
-                                st.warning(msg)
-                        else:
-                            st.warning("Digite um nome.")
-
-                if subject_colors:
-                    st.caption("Materias cadastradas: " + ", ".join([f"{k}" for k in subject_colors.keys()]))
+                                st.error(m)
+                    else:
+                        st.info("Nenhuma materia cadastrada.")
 
             st.markdown("---")
             st.markdown("### Preencher Grade")
-            st.info("Caso a materia nao esteja na lista, cadastre-a acima primeiro.")
             
             options_list = sorted(list(subject_colors.keys()))
             if "Livre" not in options_list:
