@@ -173,7 +173,7 @@ def load_view():
         st.warning("Selecione um aluno.")
         return
     
-    is_mentor = st.session_state.get('role') == 'mentor'
+    is_mentor = st.session_state.get('role') == 'Mentor'
     
     try:
         sh = connect_to_sheets()
