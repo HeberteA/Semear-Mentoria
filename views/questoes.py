@@ -284,26 +284,94 @@ def load_view():
                             df_hist_user['Qtd'] = pd.to_numeric(df_hist_user['Qtd'], errors='coerce').fillna(0).astype(int)
                             
                             total_geral = df_hist_user['Qtd'].sum()
+                            semanas_unicas = df_hist_user['Semana'].nunique()
+                            media_semanal = int(total_geral / semanas_unicas) if semanas_unicas > 0 else 0
                             
-                            c1, c2 = st.columns([1, 3])
+                            semana_top = df_hist_user.groupby('Semana')['Qtd'].sum().sort_values(ascending=False)
+                            melhor_semana_val = semana_top.values[0] if not semana_top.empty else 0
+                            
+                            materia_top = df_hist_user.groupby('Materia')['Qtd'].sum().sort_values(ascending=False)
+                            materia_nome = materia_top.index[0] if not materia_top.empty else "-"
+                            materia_val = materia_top.values[0] if not materia_top.empty else 0
+                            
+                            materias_ativas = df_hist_user['Materia'].nunique()
+                            
+                            st.markdown("""
+                            <style>
+                                .metric-card {
+                                    background: rgba(6, 78, 59, 0.4);
+                                    border: 1px solid rgba(16, 185, 129, 0.2);
+                                    border-radius: 8px;
+                                    padding: 15px;
+                                    text-align: center;
+                                }
+                                .metric-title { color: #A7F3D0; font-size: 12px; margin-bottom: 5px; }
+                                .metric-value { color: #10B981; font-size: 24px; font-weight: bold; }
+                                .metric-sub { color: #6EE7B7; font-size: 10px; }
+                            </style>
+                            """, unsafe_allow_html=True)
+                            
+                            c1, c2, c3, c4, c5 = st.columns(5)
+                            
                             with c1:
-                                st.metric("Total Acumulado", total_geral)
+                                st.markdown(f"""
+                                <div class="metric-card">
+                                    <div class="metric-title">Total Acumulado</div>
+                                    <div class="metric-value">{total_geral}</div>
+                                    <div class="metric-sub">Questoes</div>
+                                </div>
+                                """, unsafe_allow_html=True)
                             with c2:
-                                st.caption("Este total soma todas as questoes ja arquivadas de semanas anteriores.")
+                                st.markdown(f"""
+                                <div class="metric-card">
+                                    <div class="metric-title">Media Semanal</div>
+                                    <div class="metric-value">{media_semanal}</div>
+                                    <div class="metric-sub">Questoes/Semana</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            with c3:
+                                st.markdown(f"""
+                                <div class="metric-card">
+                                    <div class="metric-title">Melhor Semana</div>
+                                    <div class="metric-value">{melhor_semana_val}</div>
+                                    <div class="metric-sub">Recorde</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            with c4:
+                                st.markdown(f"""
+                                <div class="metric-card">
+                                    <div class="metric-title">Materia Top</div>
+                                    <div class="metric-value">{materia_val}</div>
+                                    <div class="metric-sub">{materia_nome}</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            with c5:
+                                st.markdown(f"""
+                                <div class="metric-card">
+                                    <div class="metric-title">Materias Ativas</div>
+                                    <div class="metric-value">{materias_ativas}</div>
+                                    <div class="metric-sub">Disciplinas</div>
+                                </div>
+                                """, unsafe_allow_html=True)
                             
+                            st.write("")
                             st.markdown("### Evolucao por Semana")
                             fig_hist = px.bar(
                                 df_hist_user,
                                 x="Semana",
                                 y="Qtd",
                                 color="Materia",
-                                title="Questoes por Semana (Historico)",
+                                barmode="group",
+                                color_discrete_sequence=px.colors.qualitative.Pastel,
                                 text_auto=True
                             )
                             fig_hist.update_layout(
                                 paper_bgcolor='rgba(0,0,0,0)',
                                 plot_bgcolor='rgba(0,0,0,0)',
-                                font_color='#ECFDF5'
+                                font_color='#ECFDF5',
+                                xaxis_title=None,
+                                yaxis_title=None,
+                                legend_title=None
                             )
                             st.plotly_chart(fig_hist, use_container_width=True)
                             
