@@ -47,7 +47,7 @@ def load_view():
             col_m1.metric("Média Geral da Turma (Simulados)", f"{avg_geral:.1f}")
         
         if not df_questoes.empty:
-            total_q_turma = df_questoes['Total_Feito'].sum()
+            total_q_turma = df_questoes['Qtd'].sum()
             col_m2.metric("Total de Questões da Turma", f"{total_q_turma}")
             
         st.markdown("---")
