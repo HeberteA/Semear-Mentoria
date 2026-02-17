@@ -173,7 +173,8 @@ def load_view():
         st.warning("Selecione um aluno.")
         return
     
-    is_mentor = st.session_state.get('role') == 'Mentor'
+    user_role = str(st.session_state.get('role', '')).lower().strip()
+    is_mentor = user_role == 'mentor'
     
     try:
         sh = connect_to_sheets()
@@ -251,7 +252,11 @@ def load_view():
 
             st.markdown("---")
             st.markdown("### Preencher Grade")
-            st.info("Escreva o nome da materia ou copie e cole das cadastradas.")
+            st.info("Caso a materia nao esteja na lista, cadastre-a acima primeiro.")
+            
+            options_list = sorted(list(subject_colors.keys()))
+            if "Livre" not in options_list:
+                options_list.insert(0, "Livre")
             
             df_editor = df_user.drop(columns=['Hora_Sort'], errors='ignore') if not df_user.empty else pd.DataFrame(columns=cols)
             
@@ -261,8 +266,10 @@ def load_view():
             }
             
             for day in days_cols:
-                column_cfg[day] = st.column_config.TextColumn(
+                column_cfg[day] = st.column_config.SelectboxColumn(
                     day[:3],
+                    options=options_list,
+                    required=True,
                     width="medium"
                 )
 
