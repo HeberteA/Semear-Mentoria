@@ -100,7 +100,7 @@ def load_view():
     #selected_frente = c_filter2.selectbox("Frente", frentes)
     #df_frente = df_materia[df_materia['Frente'] == selected_frente]
     
-    partes = sorted(df_frente['Parte'].unique().tolist())
+    partes = sorted(df_materia['Parte'].unique().tolist())
     selected_parte = c_filter3.selectbox("Parte", partes)
     df_filtered = df_materia[df_materia['Parte'] == selected_parte].copy()
 
