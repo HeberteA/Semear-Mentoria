@@ -145,20 +145,20 @@ def load_view():
                     options=["Baixa", "Media", "Alta"],
                     index=["Baixa", "Media", "Alta"].index(imp_val),
                     key=f"imp_{index}",
-                    label_visibility="collapsed" 
+                    label_visibility="visible" 
                 )
                 
                 is_dado = str(row.get('Status_Dado', '')).upper() == 'TRUE'
                 is_estudado = str(row.get('Status_Estudado', '')).upper() == 'TRUE'
                 
-                chk_dado = c2.checkbox("Dado", value=is_dado, key=f"dado_{index}")
-                chk_est = c3.checkbox("Estudado", value=is_estudado, key=f"est_{index}")
+                chk_dado = c2.toogle("Dado", value=is_dado, key=f"dado_{index}")
+                chk_est = c3.toogle("Estudado", value=is_estudado, key=f"est_{index}")
 
                 val_ex = safe_int('Qtd_Exercicios')
                 val_ac = safe_int('Qtd_Acertos')
 
-                qtd_ex = c4.number_input("Ex", min_value=0, value=val_ex, key=f"qtd_{index}", label_visibility="collapsed")
-                qtd_ac = c5.number_input("Acertos", min_value=0, value=val_ac, key=f"ac_{index}", label_visibility="collapsed")
+                qtd_ex = c4.number_input("Ex", min_value=0, value=val_ex, key=f"qtd_{index}", label_visibility="visible")
+                qtd_ac = c5.number_input("Acertos", min_value=0, value=val_ac, key=f"ac_{index}", label_visibility="visible")
                 
                 updates[row_id] = {
                     'Importancia': sel_imp, 
@@ -174,14 +174,14 @@ def load_view():
                     with col_obj:
                         rc1, rc2 = st.columns([1, 1.5])
                         is_checked = str(row.get(db_chk_key, '')).upper() == 'TRUE'
-                        chk_val = rc1.checkbox(r_label, value=is_checked, key=r_key_chk)
+                        chk_val = rc1.toogle(r_label, value=is_checked, key=r_key_chk)
                         qtd_val_db = safe_int(db_qtd_key)
                         qtd_val = rc2.number_input(
                             f"Q{r_label}", 
                             min_value=0, 
                             value=qtd_val_db, 
                             key=r_key_qtd, 
-                            label_visibility="collapsed"
+                            label_visibility="visible"
                         )
                         return chk_val, qtd_val
 
@@ -197,31 +197,31 @@ def load_view():
                     'R4_Feita': r4_c, 'R4_Qtd': r4_q
                 })
 
-        submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
-        
-        if submit:
-            try:
-                cells_to_update = []
+                submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
                 
-                for r_id, vals in updates.items():
-                    for field, value in vals.items():
-                        if field in col_map:
-                            col_idx = col_map[field]
+                if submit:
+                    try:
+                        cells_to_update = []
+                        
+                        for r_id, vals in updates.items():
+                            for field, value in vals.items():
+                                if field in col_map:
+                                    col_idx = col_map[field]
+                                    
+                                    if isinstance(value, bool):
+                                        val_str = "TRUE" if value else "FALSE"
+                                    else:
+                                        val_str = str(value)
+                                        
+                                    cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
+                        
+                        if cells_to_update:
+                            worksheet.update_cells(cells_to_update)
+                            st.success("Progresso salvo com sucesso")
+                            sleep(0.5)
+                            st.rerun()
+                        else:
+                            st.warning("Nenhuma alteracao para salvar")
                             
-                            if isinstance(value, bool):
-                                val_str = "TRUE" if value else "FALSE"
-                            else:
-                                val_str = str(value)
-                                
-                            cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
-                
-                if cells_to_update:
-                    worksheet.update_cells(cells_to_update)
-                    st.success("Progresso salvo com sucesso")
-                    sleep(0.5)
-                    st.rerun()
-                else:
-                    st.warning("Nenhuma alteracao para salvar")
-                    
-            except Exception as e:
-                st.error(f"Erro ao salvar: {e}")
+                    except Exception as e:
+                        st.error(f"Erro ao salvar: {e}")
