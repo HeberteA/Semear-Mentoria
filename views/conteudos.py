@@ -197,7 +197,7 @@ def load_view():
                     'R4_Feita': r4_c, 'R4_Qtd': r4_q
                 })
 
-                submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
+        submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
             
         if submit:
             try:
