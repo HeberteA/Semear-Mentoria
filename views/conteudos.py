@@ -96,13 +96,13 @@ def load_view():
     selected_materia = c_filter1.selectbox("Materia", materias)
     df_materia = df_user[df_user['Materia'] == selected_materia]
     
-    frentes = sorted(df_materia['Frente'].unique().tolist())
-    selected_frente = c_filter2.selectbox("Frente", frentes)
-    df_frente = df_materia[df_materia['Frente'] == selected_frente]
+    #frentes = sorted(df_materia['Frente'].unique().tolist())
+    #selected_frente = c_filter2.selectbox("Frente", frentes)
+    #df_frente = df_materia[df_materia['Frente'] == selected_frente]
     
     partes = sorted(df_frente['Parte'].unique().tolist())
     selected_parte = c_filter3.selectbox("Parte", partes)
-    df_filtered = df_frente[df_frente['Parte'] == selected_parte].copy()
+    df_filtered = df_materia[df_materia['Parte'] == selected_parte].copy()
     
     st.markdown("---")
     
