@@ -25,36 +25,31 @@ def init_conteudos_if_needed(df, username, worksheet):
         if not template_df.empty:
             new_data = template_df.copy()
             new_data['Username'] = username
-            
             values_to_append = new_data.values.tolist()
-            
             worksheet.append_rows(values_to_append)
-            st.success("Trilha de conteudos inicializada!")
+            st.success("Trilha inicializada")
             sleep(1)
             st.rerun()
 
 def load_view():
     st.markdown("<h2 style='color: #10B981;'>Conteudos e Aulas</h2>", unsafe_allow_html=True)
     
-    target_student = st.session_state['target_student']
+    target_student = st.session_state.get('target_student', None)
     if not target_student:
-        st.warning("Selecione um aluno.")
+        st.warning("Selecione um aluno")
         return
 
     try:
         sh = connect_to_sheets()
         worksheet = sh.worksheet("CONTEUDOS")
-        
         raw_data = worksheet.get_all_values()
         
         if not raw_data:
-            st.error("A planilha CONTEUDOS esta vazia.")
+            st.error("A planilha esta vazia")
             return
             
         headers = [h.strip() for h in raw_data[0]]
-        rows = raw_data[1:]
-        
-        df = pd.DataFrame(rows, columns=headers)
+        df = pd.DataFrame(raw_data[1:], columns=headers)
         
     except Exception as e:
         st.error(f"Erro ao carregar: {e}")
@@ -63,34 +58,29 @@ def load_view():
     init_conteudos_if_needed(df, target_student, worksheet)
     
     raw_data = worksheet.get_all_values()
-    headers = [h.strip() for h in raw_data[0]]
     df = pd.DataFrame(raw_data[1:], columns=headers)
-    
     df_user = df[df['Username'] == target_student].copy()
     
     if df_user.empty:
-        st.info("Nenhum conteudo encontrado para este aluno.")
+        st.info("Nenhum conteudo encontrado")
         return
 
     c_filter1, c_filter2, c_filter3 = st.columns(3)
     
     materias = sorted(df_user['Materia'].unique().tolist())
     if not materias:
-        st.warning("Sem materias cadastradas.")
+        st.warning("Sem materias cadastradas")
         return
         
     selected_materia = c_filter1.selectbox("Materia", materias)
-    
     df_materia = df_user[df_user['Materia'] == selected_materia]
+    
     frentes = sorted(df_materia['Frente'].unique().tolist())
-    
     selected_frente = c_filter2.selectbox("Frente", frentes)
-    
     df_frente = df_materia[df_materia['Frente'] == selected_frente]
+    
     partes = sorted(df_frente['Parte'].unique().tolist())
-    
     selected_parte = c_filter3.selectbox("Parte", partes)
-    
     df_filtered = df_frente[df_frente['Parte'] == selected_parte].copy()
     
     st.markdown("---")
@@ -112,26 +102,20 @@ def load_view():
                 return 0
             
             imp_val = row.get('Importancia', 'Baixa')
-            if imp_val not in ["Baixa", "Média", "Alta"]:
+            if imp_val not in ["Baixa", "Media", "Alta"]:
                 imp_val = "Baixa"
-
-            imp_icons = {
-                "Alta": "🔴",
-                "Média": "🟡",
-                "Baixa": "🟢"
-            }
-            icon = imp_icons.get(imp_val, "⚪")
             
             conteudo_title = row.get('Conteudo', 'Sem Titulo')
             
-            with st.expander(f"{icon}  {conteudo_title}", expanded=False):
+            with st.container(border=True):
+                st.markdown(f"**{conteudo_title}**")
                 
-                c1, c2, c3 = st.columns([1.5, 1, 1])
+                c1, c2, c3, c4, c5 = st.columns([1.5, 1, 1, 1, 1])
                 
                 sel_imp = c1.selectbox(
-                    "Importância", 
-                    options=["Baixa", "Média", "Alta"],
-                    index=["Baixa", "Média", "Alta"].index(imp_val),
+                    "Importancia", 
+                    options=["Baixa", "Media", "Alta"],
+                    index=["Baixa", "Media", "Alta"].index(imp_val),
                     key=f"imp_{index}",
                     label_visibility="collapsed" 
                 )
@@ -139,22 +123,14 @@ def load_view():
                 is_dado = str(row.get('Status_Dado', '')).upper() == 'TRUE'
                 is_estudado = str(row.get('Status_Estudado', '')).upper() == 'TRUE'
                 
-                chk_dado = c2.toggle("Dado?", value=is_dado, key=f"dado_{index}")
-                chk_est = c3.toggle("Estudado?", value=is_estudado, key=f"est_{index}")
+                chk_dado = c2.toggle("Dado", value=is_dado, key=f"dado_{index}")
+                chk_est = c3.toggle("Estudado", value=is_estudado, key=f"est_{index}")
 
-                st.markdown("<div style='height: 5px'></div>", unsafe_allow_html=True) 
-                c4, c5 = st.columns(2)
+                val_ex = safe_int('Qtd_Exercicios')
+                val_ac = safe_int('Qtd_Acertos')
 
-                val_ex = 0
-                if str(row.get('Qtd_Exercicios', '')).isdigit():
-                    val_ex = int(row.get('Qtd_Exercicios'))
-                    
-                val_ac = 0
-                if str(row.get('Qtd_Acertos', '')).isdigit():
-                    val_ac = int(row.get('Qtd_Acertos'))
-
-                qtd_ex = c4.number_input("Exercicios", min_value=0, value=val_ex, key=f"qtd_{index}")
-                qtd_ac = c5.number_input("Acertos", min_value=0, value=val_ac, key=f"ac_{index}")
+                qtd_ex = c4.number_input("Ex", min_value=0, value=val_ex, key=f"qtd_{index}", label_visibility="collapsed")
+                qtd_ac = c5.number_input("Acertos", min_value=0, value=val_ac, key=f"ac_{index}", label_visibility="collapsed")
                 
                 updates[row_id] = {
                     'Importancia': sel_imp, 
@@ -164,19 +140,13 @@ def load_view():
                     'Qtd_Acertos': qtd_ac
                 }
                 
-                st.markdown("<div style='margin-top:10px; margin-bottom:5px; border-top:1px solid rgba(255,255,255,0.1);'></div>", unsafe_allow_html=True)
-                st.caption("Controle de Revisões")
-                
-                
                 r1, r2, r3, r4 = st.columns(4)
                 
                 def render_revision(col_obj, r_label, r_key_chk, r_key_qtd, db_chk_key, db_qtd_key):
                     with col_obj:
                         is_checked = str(row.get(db_chk_key, '')).upper() == 'TRUE'
                         chk_val = st.toggle(r_label, value=is_checked, key=r_key_chk)
-                        
                         qtd_val_db = safe_int(db_qtd_key)
-                        
                         qtd_val = st.number_input(
                             f"Qtd {r_label}", 
                             min_value=0, 
@@ -204,15 +174,6 @@ def load_view():
             try:
                 cells_to_update = []
                 
-                fields = [
-                    'Importancia',
-                    'Status_Dado', 'Status_Estudado', 'Qtd_Exercicios', 'Qtd_Acertos',
-                    'R1_Feita', 'R1_Qtd',
-                    'R2_Feita', 'R2_Qtd',
-                    'R3_Feita', 'R3_Qtd',
-                    'R4_Feita', 'R4_Qtd'
-                ]
-                
                 for r_id, vals in updates.items():
                     for field, value in vals.items():
                         if field in col_map:
@@ -227,11 +188,11 @@ def load_view():
                 
                 if cells_to_update:
                     worksheet.update_cells(cells_to_update)
-                    st.success("Progresso salvo com sucesso!")
+                    st.success("Progresso salvo com sucesso")
                     sleep(0.5)
                     st.rerun()
                 else:
-                    st.warning("Nenhuma alteracao para salvar.")
+                    st.warning("Nenhuma alteracao para salvar")
                     
             except Exception as e:
                 st.error(f"Erro ao salvar: {e}")
