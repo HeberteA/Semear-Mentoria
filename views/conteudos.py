@@ -190,7 +190,7 @@ def load_view():
                 r3_c, r3_q = render_revision(r3, "R3", f"r3_{index}", f"r3q_{index}", 'R3_Feita', 'R3_Qtd')
                 r4_c, r4_q = render_revision(r4, "R4", f"r4_{index}", f"r4q_{index}", 'R4_Feita', 'R4_Qtd')
                 
-                submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
+                submit = st.form_submit_button("Salvar Progresso", use_container_width=True, key=f"submit_{index}")
             
                 if submit:
                     try:
