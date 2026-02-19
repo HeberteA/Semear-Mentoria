@@ -151,8 +151,8 @@ def load_view():
                 is_dado = str(row.get('Status_Dado', '')).upper() == 'TRUE'
                 is_estudado = str(row.get('Status_Estudado', '')).upper() == 'TRUE'
                 
-                chk_dado = c2.toogle("Dado", value=is_dado, key=f"dado_{index}")
-                chk_est = c3.toogle("Estudado", value=is_estudado, key=f"est_{index}")
+                chk_dado = c2.toggle("Dado", value=is_dado, key=f"dado_{index}")
+                chk_est = c3.toggle("Estudado", value=is_estudado, key=f"est_{index}")
 
                 val_ex = safe_int('Qtd_Exercicios')
                 val_ac = safe_int('Qtd_Acertos')
@@ -174,7 +174,7 @@ def load_view():
                     with col_obj:
                         rc1, rc2 = st.columns([1, 1.5])
                         is_checked = str(row.get(db_chk_key, '')).upper() == 'TRUE'
-                        chk_val = rc1.toogle(r_label, value=is_checked, key=r_key_chk)
+                        chk_val = rc1.toggle(r_label, value=is_checked, key=r_key_chk)
                         qtd_val_db = safe_int(db_qtd_key)
                         qtd_val = rc2.number_input(
                             f"Q{r_label}", 
@@ -197,31 +197,31 @@ def load_view():
                     'R4_Feita': r4_c, 'R4_Qtd': r4_q
                 })
 
-    submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
-        
-    if submit:
-        try:
-            cells_to_update = []
-            
-            for r_id, vals in updates.items():
-                for field, value in vals.items():
-                    if field in col_map:
-                        col_idx = col_map[field]
+                submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
+                    
+                if submit:
+                    try:
+                        cells_to_update = []
                         
-                        if isinstance(value, bool):
-                            val_str = "TRUE" if value else "FALSE"
+                        for r_id, vals in updates.items():
+                            for field, value in vals.items():
+                                if field in col_map:
+                                    col_idx = col_map[field]
+                                    
+                                    if isinstance(value, bool):
+                                        val_str = "TRUE" if value else "FALSE"
+                                    else:
+                                        val_str = str(value)
+                                        
+                                    cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
+                        
+                        if cells_to_update:
+                            worksheet.update_cells(cells_to_update)
+                            st.success("Progresso salvo com sucesso")
+                            sleep(0.5)
+                            st.rerun()
                         else:
-                            val_str = str(value)
+                            st.warning("Nenhuma alteracao para salvar")
                             
-                        cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
-            
-            if cells_to_update:
-                worksheet.update_cells(cells_to_update)
-                st.success("Progresso salvo com sucesso")
-                sleep(0.5)
-                st.rerun()
-            else:
-                st.warning("Nenhuma alteracao para salvar")
-                
-        except Exception as e:
-            st.error(f"Erro ao salvar: {e}")
+                    except Exception as e:
+                        st.error(f"Erro ao salvar: {e}")
