@@ -108,7 +108,7 @@ def load_view():
     st.markdown("---")
     
     with st.form("conteudos_form"):
-        st.markdown(f"<div style='margin-bottom:20px; color:rgb(167, 243, 208)'>Editando: <b>{selected_materia}</b> | <b>{selected_frente}</b> | <b>{selected_parte}</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='margin-bottom:20px; color:rgb(167, 243, 208)'>Editando: <b>{selected_materia}</b> | <b>{selected_parte}</b></div>", unsafe_allow_html=True)
         
         updates = {} 
         col_map = {name: i + 1 for i, name in enumerate(headers)}
