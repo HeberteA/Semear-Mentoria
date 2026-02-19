@@ -190,38 +190,38 @@ def load_view():
                 r3_c, r3_q = render_revision(r3, "R3", f"r3_{index}", f"r3q_{index}", 'R3_Feita', 'R3_Qtd')
                 r4_c, r4_q = render_revision(r4, "R4", f"r4_{index}", f"r4q_{index}", 'R4_Feita', 'R4_Qtd')
                 
-                updates[row_id].update({
-                    'R1_Feita': r1_c, 'R1_Qtd': r1_q,
-                    'R2_Feita': r2_c, 'R2_Qtd': r2_q,
-                    'R3_Feita': r3_c, 'R3_Qtd': r3_q,
-                    'R4_Feita': r4_c, 'R4_Qtd': r4_q
-                })
-
                 submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
-                    
+            
                 if submit:
                     try:
                         cells_to_update = []
                         
-                        for r_id, vals in updates.items():
-                            for field, value in vals.items():
-                                if field in col_map:
-                                    col_idx = col_map[field]
-                                    
-                                    if isinstance(value, bool):
-                                        val_str = "TRUE" if value else "FALSE"
-                                    else:
-                                        val_str = str(value)
-                                        
-                                    cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
+                        row_updates = {
+                            'Importancia': sel_imp, 
+                            'Status_Dado': chk_dado,
+                            'Status_Estudado': chk_est,
+                            'Qtd_Exercicios': qtd_ex,
+                            'Qtd_Acertos': qtd_ac,
+                            'R1_Feita': r1_c, 'R1_Qtd': r1_q,
+                            'R2_Feita': r2_c, 'R2_Qtd': r2_q,
+                            'R3_Feita': r3_c, 'R3_Qtd': r3_q,
+                            'R4_Feita': r4_c, 'R4_Qtd': r4_q
+                        }
+                        
+                        for field, value in row_updates.items():
+                            if field in col_map:
+                                col_idx = col_map[field]
+                                if isinstance(value, bool):
+                                    val_str = "TRUE" if value else "FALSE"
+                                else:
+                                    val_str = str(value)
+                                cells_to_update.append(gspread.Cell(row_id, col_idx, val_str))
                         
                         if cells_to_update:
                             worksheet.update_cells(cells_to_update)
                             st.success("Progresso salvo com sucesso")
                             sleep(0.5)
                             st.rerun()
-                        else:
-                            st.warning("Nenhuma alteracao para salvar")
                             
                     except Exception as e:
                         st.error(f"Erro ao salvar: {e}")
