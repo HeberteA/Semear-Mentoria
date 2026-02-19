@@ -86,7 +86,7 @@ def load_view():
         st.info("Nenhum conteudo encontrado")
         return
 
-    c_filter1, c_filter2, c_filter3 = st.columns(3)
+    c_filter1, c_filter2 = st.columns(2)
     
     materias = sorted(df_user['Materia'].unique().tolist())
     if not materias:
@@ -101,7 +101,7 @@ def load_view():
     #df_frente = df_materia[df_materia['Frente'] == selected_frente]
     
     partes = sorted(df_materia['Parte'].unique().tolist())
-    selected_parte = c_filter3.selectbox("Parte", partes)
+    selected_parte = c_filter2.selectbox("Parte", partes)
     df_filtered = df_materia[df_materia['Parte'] == selected_parte].copy()
 
     
