@@ -32,7 +32,28 @@ def init_conteudos_if_needed(df, username, worksheet):
             st.rerun()
 
 def load_view():
-    st.markdown("<h2 style='color: #10B981;'>Conteudos e Aulas</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    .conteudo-titulo {
+        font-size: 16px;
+        font-weight: 600;
+        padding-left: 12px;
+        margin-bottom: 15px;
+        background-color: rgba(255,255,255,0.03);
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-radius: 4px;
+    }
+    .stNumberInput {
+        min-width: 60px;
+    }
+    div[data-testid="stVerticalBlock"] > div {
+        padding-bottom: 0px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h2 style='color: rgb(16, 185, 129);'>Conteudos e Aulas</h2>", unsafe_allow_html=True)
     
     target_student = st.session_state.get('target_student', None)
     if not target_student:
@@ -86,10 +107,16 @@ def load_view():
     st.markdown("---")
     
     with st.form("conteudos_form"):
-        st.markdown(f"<div style='margin-bottom:20px; color:#A7F3D0'>Editando: <b>{selected_materia}</b> | <b>{selected_frente}</b> | <b>{selected_parte}</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='margin-bottom:20px; color:rgb(167, 243, 208)'>Editando: <b>{selected_materia}</b> | <b>{selected_frente}</b> | <b>{selected_parte}</b></div>", unsafe_allow_html=True)
         
         updates = {} 
         col_map = {name: i + 1 for i, name in enumerate(headers)}
+        
+        color_map = {
+            "Alta": "rgb(239, 68, 68)",
+            "Media": "rgb(245, 158, 11)",
+            "Baixa": "rgb(16, 185, 129)"
+        }
         
         for index, row in df_filtered.iterrows():
             row_id = int(index) + 2
@@ -104,11 +131,12 @@ def load_view():
             imp_val = row.get('Importancia', 'Baixa')
             if imp_val not in ["Baixa", "Media", "Alta"]:
                 imp_val = "Baixa"
-            
+                
+            border_color = color_map[imp_val]
             conteudo_title = row.get('Conteudo', 'Sem Titulo')
             
             with st.container(border=True):
-                st.markdown(f"**{conteudo_title}**")
+                st.markdown(f"<div class='conteudo-titulo' style='border-left: 5px solid {border_color};'>{conteudo_title}</div>", unsafe_allow_html=True)
                 
                 c1, c2, c3, c4, c5 = st.columns([1.5, 1, 1, 1, 1])
                 
@@ -123,8 +151,8 @@ def load_view():
                 is_dado = str(row.get('Status_Dado', '')).upper() == 'TRUE'
                 is_estudado = str(row.get('Status_Estudado', '')).upper() == 'TRUE'
                 
-                chk_dado = c2.toggle("Dado", value=is_dado, key=f"dado_{index}")
-                chk_est = c3.toggle("Estudado", value=is_estudado, key=f"est_{index}")
+                chk_dado = c2.checkbox("Dado", value=is_dado, key=f"dado_{index}")
+                chk_est = c3.checkbox("Estudado", value=is_estudado, key=f"est_{index}")
 
                 val_ex = safe_int('Qtd_Exercicios')
                 val_ac = safe_int('Qtd_Acertos')
@@ -144,11 +172,12 @@ def load_view():
                 
                 def render_revision(col_obj, r_label, r_key_chk, r_key_qtd, db_chk_key, db_qtd_key):
                     with col_obj:
+                        rc1, rc2 = st.columns([1, 1.5])
                         is_checked = str(row.get(db_chk_key, '')).upper() == 'TRUE'
-                        chk_val = st.toggle(r_label, value=is_checked, key=r_key_chk)
+                        chk_val = rc1.checkbox(r_label, value=is_checked, key=r_key_chk)
                         qtd_val_db = safe_int(db_qtd_key)
-                        qtd_val = st.number_input(
-                            f"Qtd {r_label}", 
+                        qtd_val = rc2.number_input(
+                            f"Q{r_label}", 
                             min_value=0, 
                             value=qtd_val_db, 
                             key=r_key_qtd, 
