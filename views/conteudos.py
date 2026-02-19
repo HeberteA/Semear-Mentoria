@@ -197,31 +197,31 @@ def load_view():
                     'R4_Feita': r4_c, 'R4_Qtd': r4_q
                 })
 
-            submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
+                submit = st.form_submit_button("Salvar Progresso", use_container_width=True)
             
-            if submit:
-                try:
-                    cells_to_update = []
-                    
-                    for r_id, vals in updates.items():
-                        for field, value in vals.items():
-                            if field in col_map:
-                                col_idx = col_map[field]
+        if submit:
+            try:
+                cells_to_update = []
+                
+                for r_id, vals in updates.items():
+                    for field, value in vals.items():
+                        if field in col_map:
+                            col_idx = col_map[field]
+                            
+                            if isinstance(value, bool):
+                                val_str = "TRUE" if value else "FALSE"
+                            else:
+                                val_str = str(value)
                                 
-                                if isinstance(value, bool):
-                                    val_str = "TRUE" if value else "FALSE"
-                                else:
-                                    val_str = str(value)
-                                    
-                                cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
+                            cells_to_update.append(gspread.Cell(r_id, col_idx, val_str))
+                
+                if cells_to_update:
+                    worksheet.update_cells(cells_to_update)
+                    st.success("Progresso salvo com sucesso")
+                    sleep(0.5)
+                    st.rerun()
+                else:
+                    st.warning("Nenhuma alteracao para salvar")
                     
-                    if cells_to_update:
-                        worksheet.update_cells(cells_to_update)
-                        st.success("Progresso salvo com sucesso")
-                        sleep(0.5)
-                        st.rerun()
-                    else:
-                        st.warning("Nenhuma alteracao para salvar")
-                        
-                except Exception as e:
-                    st.error(f"Erro ao salvar: {e}")
+            except Exception as e:
+                st.error(f"Erro ao salvar: {e}")
