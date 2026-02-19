@@ -103,6 +103,7 @@ def load_view():
     partes = sorted(df_frente['Parte'].unique().tolist())
     selected_parte = c_filter3.selectbox("Parte", partes)
     df_filtered = df_materia[df_materia['Parte'] == selected_parte].copy()
+
     
     st.markdown("---")
     
