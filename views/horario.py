@@ -13,6 +13,7 @@ def get_contrast_text_color(hex_color):
     except:
         return '#FFFFFF'
 
+@st.cache_data(ttl=600)
 def connect_to_sheets():
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     credentials = Credentials.from_service_account_info(
