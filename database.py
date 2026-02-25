@@ -14,9 +14,9 @@ def connect_to_sheets():
     return client.open("Semear Mentoria")
 
 @st.cache_data(ttl=600)
-def fetch_sheet_data(sheet_name):
+def fetch_sheet_data("Semear Mentoria"):
     sh = connect_to_sheets()
-    worksheet = sh.worksheet(sheet_name)
+    worksheet = sh.worksheet("Semear Mentoria")
     raw_data = worksheet.get_all_values()
     
     if not raw_data:
