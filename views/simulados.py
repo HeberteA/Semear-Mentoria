@@ -9,15 +9,6 @@ from plotly.subplots import make_subplots
 from datetime import datetime
 from main import fetch_sheet_data, connect_to_sheets
 
-def connect_to_sheets():
-    scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    credentials = Credentials.from_service_account_info(
-        dict(st.secrets["gcp_service_account"]),
-        scopes=scopes
-    )
-    client = gspread.authorize(credentials)
-    return client.open("Semear Mentoria")
-
 def load_view():
     st.markdown("<h2 style='color: #10B981;'>Controle de Simulados</h2>", unsafe_allow_html=True)
     
@@ -32,7 +23,7 @@ def load_view():
         st.session_state['edit_sim_data'] = {}
 
     try:
-        sh = connect_to_sheets()
+        sh = fetch_sheet_data()
         worksheet = sh.worksheet("SIMULADOS")
         
         raw_data = worksheet.get_all_values()
