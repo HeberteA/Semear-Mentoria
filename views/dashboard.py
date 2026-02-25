@@ -293,7 +293,7 @@ def load_view():
         if not df_time.empty:
             c_pie, c_bar_time = st.columns(2)
             with c_pie:
-                fig_pie = px.donut(df_time, values='Qtd_Horas', names='Materia', hole=0.4, color_discrete_sequence=px.colors.qualitative.Set3)
+                fig_pie = px.pie(df_time, values='Qtd_Horas', names='Materia', hole=0.4, color_discrete_sequence=px.colors.qualitative.Set3)
                 fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='#ECFDF5', showlegend=False)
                 st.plotly_chart(fig_pie, use_container_width=True)
             with c_bar_time:
