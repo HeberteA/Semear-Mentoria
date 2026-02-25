@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
+@st.cache_data(ttl=600)
 def connect_to_sheets():
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     credentials = Credentials.from_service_account_info(
