@@ -32,7 +32,7 @@ def load_view():
         st.session_state['edit_sim_data'] = {}
 
     try:
-        sh = fetch_sheet_data()
+        sh = connect_to_sheets()
         worksheet = sh.worksheet("SIMULADOS")
         
         raw_data = worksheet.get_all_values()
