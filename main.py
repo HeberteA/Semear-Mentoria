@@ -3,28 +3,7 @@ from streamlit_option_menu import option_menu
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
-
-@st.cache_resource
-def connect_to_sheets():
-    scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    credentials = Credentials.from_service_account_info(
-        dict(st.secrets["gcp_service_account"]),
-        scopes=scopes
-    )
-    client = gspread.authorize(credentials)
-    return client.open("Semear Mentoria")
-
-@st.cache_data(ttl=300)
-def fetch_sheet_data(sheet_name):
-    sh = connect_to_sheets()
-    worksheet = sh.worksheet(sheet_name)
-    raw_data = worksheet.get_all_values()
-    
-    if not raw_data:
-        return pd.DataFrame()
-        
-    headers = [h.strip() for h in raw_data[0]]
-    return pd.DataFrame(raw_data[1:], columns=headers)
+from database import fetch_sheet_data, connect_to_sheets
 
 st.set_page_config(
     page_title="Semear Mentoria",
