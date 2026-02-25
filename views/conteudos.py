@@ -4,7 +4,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 from time import sleep
 
-@st.cache_data(ttl=600)
 def connect_to_sheets():
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     credentials = Credentials.from_service_account_info(
