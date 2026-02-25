@@ -7,8 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
+from main import fetch_sheet_data, connect_to_sheets
 
-@st.cache_data(ttl=600)
 def connect_to_sheets():
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     credentials = Credentials.from_service_account_info(
@@ -32,7 +32,7 @@ def load_view():
         st.session_state['edit_sim_data'] = {}
 
     try:
-        sh = connect_to_sheets()
+        sh = fetch_sheet_data()
         worksheet = sh.worksheet("SIMULADOS")
         
         raw_data = worksheet.get_all_values()
