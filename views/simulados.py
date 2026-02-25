@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
-from main import fetch_sheet_data, connect_to_sheets
+from database import fetch_sheet_data, connect_to_sheets
 
 def load_view():
     st.markdown("<h2 style='color: #10B981;'>Controle de Simulados</h2>", unsafe_allow_html=True)
