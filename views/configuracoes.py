@@ -82,7 +82,7 @@ def load_view():
             </div>
             """, unsafe_allow_html=True)
             
-            if st.button("Remover Acesso", key=f"del_user_{index}"):
+            if st.button("Remover Acesso", key=f"del_user_{index}", use_container_width=True):
                 try:
                     worksheet.delete_rows(index + 2)
                     st.success("Usuário removido.")
